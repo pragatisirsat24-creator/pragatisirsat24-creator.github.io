@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PRD Studio — Pragati Sirsat</title>
+<meta name="description" content="Generate structured PRDs and run a rubric-based quality review. A product tool by Pragati Sirsat.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;700;800;900&family=Inter:wght@400;450;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#11131C;--ink-2:#545A68;--paper:#F2F3F5;--surface:#FFFFFF;
+    --line:#DCDFE6;--line-2:#E8EAEF;--accent:#2B43FF;--accent-deep:#1B2BB0;
+    --good:#0E7A52;--good-bg:#E6F4EE;--warn:#B86B00;--warn-bg:#FBF0DD;--bad:#C0392B;--bad-bg:#FBE9E7;
+    --display:'Schibsted Grotesk',sans-serif;--body:'Inter',sans-serif;--mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  ::selection{background:var(--accent);color:#fff}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 26px}
+  .mono{font-family:var(--mono);font-weight:500;letter-spacing:.06em;text-transform:uppercase;font-size:11.5px;color:var(--ink-2)}
+  a{color:var(--accent-deep)}
+
+  header{position:sticky;top:0;z-index:30;background:rgba(242,243,245,.85);backdrop-filter:blur(10px);border-bottom:1px solid var(--line-2)}
+  .bar{display:flex;align-items:center;justify-content:space-between;height:62px}
+  .back{display:inline-flex;align-items:center;gap:9px;text-decoration:none;color:var(--ink);font-weight:500;font-size:14.5px}
+  .back svg{width:16px;height:16px}
+  .back:hover{color:var(--accent)}
+  .by{font-family:var(--mono);font-size:11px;color:var(--ink-2);letter-spacing:.05em}
+
+  .hero{padding:50px 0 26px}
+  .kicker{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-deep);background:#E9ECFF;border:1px solid #D2D8FF;padding:6px 11px;border-radius:999px}
+  h1{font-family:var(--display);font-weight:900;letter-spacing:-.03em;font-size:clamp(38px,6vw,60px);line-height:1;margin:18px 0 0}
+  .tag{color:var(--ink-2);font-size:18px;margin:16px 0 0;max-width:60ch}
+
+  .tabs{display:inline-flex;background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:5px;margin:30px 0 0;gap:4px}
+  .tab{border:0;background:transparent;font-family:var(--body);font-weight:600;font-size:14.5px;color:var(--ink-2);padding:10px 20px;border-radius:8px;cursor:pointer;transition:.15s}
+  .tab[aria-selected="true"]{background:var(--ink);color:#fff}
+
+  main{padding:26px 0 80px}
+  .panel{display:none}
+  .panel.on{display:block}
+  .grid{display:grid;grid-template-columns:380px 1fr;gap:26px;align-items:start}
+  @media(max-width:880px){.grid{grid-template-columns:1fr}}
+
+  .box{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:24px}
+  .box h2{font-family:var(--display);font-weight:800;letter-spacing:-.02em;font-size:20px;margin:0 0 4px}
+  .box .hint{color:var(--ink-2);font-size:13.5px;margin:0 0 18px}
+
+  label{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-2);margin:16px 0 6px}
+  label:first-of-type{margin-top:0}
+  input[type=text],textarea{width:100%;font-family:var(--body);font-size:14.5px;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:9px;padding:11px 12px;resize:vertical}
+  input[type=text]:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent);background:#fff}
+  textarea{line-height:1.5}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+  .btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
+  .btn{font-family:var(--body);font-weight:600;font-size:14px;border-radius:9px;padding:11px 17px;cursor:pointer;border:1px solid transparent;transition:.15s;display:inline-flex;align-items:center;gap:8px}
+  .btn-p{background:var(--ink);color:#fff}
+  .btn-p:hover{transform:translateY(-1px)}
+  .btn-g{background:var(--surface);border-color:var(--line);color:var(--ink)}
+  .btn-g:hover{border-color:var(--ink)}
+  .btn-ai{background:#E9ECFF;border-color:#C7CFFF;color:var(--accent-deep)}
+  .btn-ai:hover{border-color:var(--accent)}
+  .btn svg{width:15px;height:15px}
+  .btn:disabled{opacity:.5;cursor:wait}
+
+  .ai-toggle{margin-top:16px;display:flex;align-items:center;gap:9px;font-size:13px;color:var(--ink-2)}
+  .ai-toggle input{width:16px;height:16px;accent-color:var(--accent)}
+
+  /* output / PRD render */
+  .out{min-height:340px}
+  .empty{height:100%;min-height:340px;display:grid;place-items:center;text-align:center;color:var(--ink-2)}
+  .empty svg{width:34px;height:34px;opacity:.4;margin-bottom:12px}
+  .doc h3{font-family:var(--display);font-weight:800;letter-spacing:-.01em;font-size:16px;margin:22px 0 8px;padding-top:14px;border-top:1px solid var(--line-2);color:var(--ink)}
+  .doc h3:first-child{border-top:0;padding-top:0;margin-top:0}
+  .doc .title{font-family:var(--display);font-weight:900;letter-spacing:-.02em;font-size:24px;margin:0 0 4px}
+  .doc .badge{font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent-deep);background:#E9ECFF;padding:3px 8px;border-radius:5px}
+  .doc p{margin:0 0 8px;font-size:14.5px}
+  .doc ul{margin:0 0 8px;padding-left:20px}
+  .doc li{font-size:14.5px;margin:4px 0}
+  .doc .todo{color:var(--warn);font-family:var(--mono);font-size:12px;background:var(--warn-bg);padding:2px 6px;border-radius:4px}
+  .doc .gwt{font-family:var(--mono);font-size:12.5px;background:var(--paper);border:1px solid var(--line-2);border-radius:7px;padding:9px 11px;margin:5px 0}
+  .barbtns{display:flex;gap:9px;margin-bottom:18px;flex-wrap:wrap}
+
+  /* review */
+  .score-card{display:flex;align-items:center;gap:22px;margin-bottom:6px}
+  .ring{--p:0;width:96px;height:96px;border-radius:50%;flex:0 0 auto;display:grid;place-items:center;
+        background:conic-gradient(var(--rc,var(--accent)) calc(var(--p)*1%),var(--line-2) 0)}
+  .ring .inner{width:74px;height:74px;border-radius:50%;background:var(--surface);display:grid;place-items:center;text-align:center}
+  .ring .num{font-family:var(--display);font-weight:900;font-size:26px;letter-spacing:-.02em;line-height:1}
+  .ring .of{font-family:var(--mono);font-size:9px;color:var(--ink-2);letter-spacing:.05em}
+  .verdict{font-family:var(--display);font-weight:800;font-size:20px;letter-spacing:-.01em}
+  .verdict span{display:block;font-family:var(--body);font-weight:400;font-size:13.5px;color:var(--ink-2);margin-top:3px}
+
+  .check{display:flex;gap:12px;padding:12px 0;border-top:1px solid var(--line-2)}
+  .ic{flex:0 0 auto;width:22px;height:22px;border-radius:6px;display:grid;place-items:center;font-family:var(--mono);font-weight:700;font-size:13px}
+  .ic.pass{background:var(--good-bg);color:var(--good)}
+  .ic.warn{background:var(--warn-bg);color:var(--warn)}
+  .ic.fail{background:var(--bad-bg);color:var(--bad)}
+  .check .ct{font-weight:600;font-size:14.5px}
+  .check .cd{font-size:13px;color:var(--ink-2);margin-top:2px}
+  .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
+  .wword{font-family:var(--mono);font-size:11.5px;background:var(--warn-bg);color:var(--warn);border:1px solid #EAD3A6;border-radius:5px;padding:3px 7px}
+  .fixlist{margin:6px 0 0;padding-left:18px}
+  .fixlist li{font-size:13.5px;margin:5px 0}
+
+  .note{font-size:12.5px;color:var(--ink-2);background:var(--surface);border:1px solid var(--line-2);border-left:3px solid var(--accent);border-radius:8px;padding:12px 14px;margin-top:22px}
+  .note b{color:var(--ink)}
+  footer{padding:26px 0;color:var(--ink-2);font-size:12.5px;text-align:center}
+  @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap bar">
+    <a class="back" href="index.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+      Back to portfolio</a>
+    <span class="by">A product tool · Pragati Sirsat</span>
+  </div>
+</header>
+
+<div class="wrap hero">
+  <span class="kicker">● PRD Studio</span>
+  <h1>Write the requirement.<br>Then pressure-test it.</h1>
+  <p class="tag">Turn a rough idea into a structured PRD, and run any PRD through a senior-PM review that scores completeness and flags ambiguity, missing acceptance criteria, and unquantified metrics. Built on patterns from 30+ shipped PRDs.</p>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" aria-selected="true" id="t-gen" onclick="switchTab('gen')">Generate a PRD</button>
+    <button class="tab" role="tab" aria-selected="false" id="t-rev" onclick="switchTab('rev')">Review a PRD</button>
+  </div>
+</div>
+
+<main class="wrap">
+  <!-- GENERATE -->
+  <section class="panel on" id="p-gen" role="tabpanel" aria-labelledby="t-gen">
+    <div class="grid">
+      <div class="box">
+        <h2>Inputs</h2>
+        <p class="hint">Fill what you know. Gaps become flagged TODOs in the draft — the way a good PM leaves them.</p>
+        <label>Feature / product name</label>
+        <input type="text" id="g-name" placeholder="e.g. Policy auto-renewal reminders">
+        <label>Problem / market signal</label>
+        <textarea id="g-problem" rows="3" placeholder="What's broken, for whom, and why it matters now."></textarea>
+        <label>Target users</label>
+        <input type="text" id="g-users" placeholder="e.g. Motor-insurance policyholders nearing expiry">
+        <label>Primary goal (outcome)</label>
+        <input type="text" id="g-goal" placeholder="e.g. Cut lapse rate at renewal">
+        <label>Key actions / scope <span style="text-transform:none;letter-spacing:0">(one per line)</span></label>
+        <textarea id="g-scope" rows="4" placeholder="Notify policyholder 30 days before expiry&#10;Let them renew in two taps&#10;Show updated premium clearly"></textarea>
+        <div class="row2">
+          <div><label>Success metric</label><input type="text" id="g-metric" placeholder="e.g. Lapse rate"></div>
+          <div><label>Target</label><input type="text" id="g-target" placeholder="e.g. −15% in 2 quarters"></div>
+        </div>
+        <label>Known risks / constraints</label>
+        <input type="text" id="g-risk" placeholder="e.g. Regulatory wording approval">
+        <div class="btns">
+          <button class="btn btn-p" onclick="doGenerate()">Generate PRD</button>
+          <button class="btn btn-g" onclick="loadSample()">Load example</button>
+          <button class="btn btn-ai" id="g-ai" onclick="doGenerateAI()">✦ Draft with live AI</button>
+        </div>
+        <label class="ai-toggle" style="margin-top:18px"><span style="text-transform:none;letter-spacing:0;font-family:var(--body)">Live AI runs when this page is opened inside Claude; on a normal host it falls back to the built-in engine.</span></label>
+      </div>
+
+      <div class="box out" id="g-out">
+        <div class="empty">
+          <div>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"/><path d="M9 13h6M9 17h4"/></svg>
+            <div>Your structured PRD appears here.<br>Try <b>Load example</b> to see the format.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- REVIEW -->
+  <section class="panel" id="p-rev" role="tabpanel" aria-labelledby="t-rev">
+    <div class="grid">
+      <div class="box">
+        <h2>Paste a PRD</h2>
+        <p class="hint">The reviewer checks structure, measurability and clarity — and highlights vague language.</p>
+        <textarea id="r-input" rows="16" placeholder="Paste any product requirements document here…"></textarea>
+        <div class="btns">
+          <button class="btn btn-p" onclick="doReview()">Run review</button>
+          <button class="btn btn-g" onclick="loadExample('strong')">Strong example</button>
+          <button class="btn btn-g" onclick="loadExample('weak')">Weak example</button>
+          <button class="btn btn-ai" id="r-ai" onclick="doReviewAI()">✦ AI second opinion</button>
+        </div>
+      </div>
+
+      <div class="box out" id="r-out">
+        <div class="empty">
+          <div>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            <div>Paste a PRD and run the review, or load the<br><b>Weak example</b> to watch it light up.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="note">
+    <b>How it works.</b> The generator and reviewer run entirely in your browser — no backend, no key, free to host on Netlify or GitHub Pages and use forever. The review engine encodes the rubric I use in practice: problem clarity, defined users, quantified goals, explicit non-goals, success metrics, acceptance criteria, dependencies and risk. The <b>live-AI</b> buttons call Claude for a qualitative pass when this page is run inside Claude, and degrade gracefully to the built-in engine elsewhere.
+  </div>
+</main>
+
+<footer>© 2026 Pragati Sirsat · PRD Studio</footer>
+
+<script>
+/* ---------- tabs ---------- */
+function switchTab(which){
+  const gen=which==='gen';
+  document.getElementById('t-gen').setAttribute('aria-selected',gen);
+  document.getElementById('t-rev').setAttribute('aria-selected',!gen);
+  document.getElementById('p-gen').classList.toggle('on',gen);
+  document.getElementById('p-rev').classList.toggle('on',!gen);
+}
+
+/* ---------- helpers ---------- */
+const esc=s=>(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const val=id=>document.getElementById(id).value.trim();
+const todo=t=>`<span class="todo">TODO: ${t}</span>`;
+
+/* ---------- GENERATE (deterministic) ---------- */
+function buildPRD(d){
+  const name=d.name||'Untitled feature';
+  const lines=(d.scope||'').split('\n').map(s=>s.trim()).filter(Boolean);
+  const stories=lines.map(a=>{
+    const act=a.replace(/^(let|allow|enable)\s+(the\s+)?(user|them|policyholder)s?\s+to\s+/i,'').replace(/\.$/,'');
+    return `As a ${d.users||'user'}, I want to ${act.charAt(0).toLowerCase()+act.slice(1)}, so that ${d.goal? d.goal.charAt(0).toLowerCase()+d.goal.slice(1):'I reach my goal'}.`;
+  });
+  let h='';
+  h+=`<div class="barbtns"><button class="btn btn-g" onclick="copyDoc()">Copy as text</button><button class="btn btn-g" onclick="downloadDoc()">Download .md</button></div>`;
+  h+=`<div class="doc" id="doc">`;
+  h+=`<div class="title">${esc(name)} <span class="badge">PRD</span></div>`;
+  h+=`<p style="color:var(--ink-2);font-size:13px;margin-bottom:4px">Owner: Pragati Sirsat · Status: Draft · ${new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</p>`;
+
+  h+=`<h3>1 · Overview</h3>`;
+  h+=`<p>${d.problem? esc(d.problem.split(/(?<=\.)\s/)[0]) : todo('one-line summary of what this is and why now')} This document defines the requirements for <b>${esc(name)}</b>.</p>`;
+
+  h+=`<h3>2 · Problem &amp; context</h3>`;
+  h+=`<p>${d.problem? esc(d.problem): todo('describe the problem, who feels it, and the evidence it exists')}</p>`;
+
+  h+=`<h3>3 · Goals &amp; non-goals</h3>`;
+  h+=`<p><b>Goal:</b> ${d.goal? esc(d.goal): todo('state the primary outcome')}</p>`;
+  h+=`<p><b>Non-goals:</b> ${todo('name what this explicitly will NOT do, to protect scope')}</p>`;
+
+  h+=`<h3>4 · Target users</h3>`;
+  h+=`<p>${d.users? esc(d.users): todo('define the user segment and their key context')}</p>`;
+
+  h+=`<h3>5 · User stories</h3>`;
+  if(stories.length){h+='<ul>'+stories.map(s=>`<li>${esc(s)}</li>`).join('')+'</ul>';}
+  else h+=`<p>${todo('list the key user actions in "Key actions / scope" to generate stories')}</p>`;
+
+  h+=`<h3>6 · Functional requirements</h3>`;
+  if(lines.length){h+='<ul>'+lines.map((l,i)=>`<li><b>FR-${i+1}:</b> ${esc(l.charAt(0).toUpperCase()+l.slice(1))}</li>`).join('')+'</ul>';}
+  else h+=`<p>${todo('derive functional requirements from scope')}</p>`;
+
+  h+=`<h3>7 · Success metrics</h3>`;
+  if(d.metric){h+=`<p><b>${esc(d.metric)}:</b> ${d.target? esc(d.target): todo('set a quantified target and timeframe')} (baseline: ${todo('current value')})</p>`;}
+  else h+=`<p>${todo('define at least one quantified success metric with a baseline and target')}</p>`;
+
+  h+=`<h3>8 · Acceptance criteria</h3>`;
+  if(stories.length){
+    h+=lines.map((l,i)=>`<div class="gwt"><b>AC-${i+1}</b> · Given a relevant ${esc(d.users||'user')},<br>When they ${esc(l.replace(/\.$/,'').toLowerCase())},<br>Then the system behaves correctly and the action is confirmed.</div>`).join('');
+    h+=`<p style="font-size:13px;color:var(--ink-2);margin-top:8px">${todo('tighten each "Then" with the exact observable outcome')}</p>`;
+  } else h+=`<p>${todo('write Given / When / Then criteria per story')}</p>`;
+
+  h+=`<h3>9 · Dependencies &amp; risks</h3>`;
+  h+=`<p>${d.risk? esc(d.risk): todo('list dependencies, assumptions and risks')}</p>`;
+
+  h+=`<h3>10 · Open questions</h3>`;
+  h+=`<ul><li>${todo('what still needs a decision before build?')}</li></ul>`;
+  h+=`</div>`;
+  return h;
+}
+function gather(){return {name:val('g-name'),problem:val('g-problem'),users:val('g-users'),goal:val('g-goal'),scope:val('g-scope'),metric:val('g-metric'),target:val('g-target'),risk:val('g-risk')};}
+function doGenerate(){document.getElementById('g-out').innerHTML=buildPRD(gather());}
+function loadSample(){
+  document.getElementById('g-name').value='Policy auto-renewal reminders';
+  document.getElementById('g-problem').value='A measurable share of motor-insurance policies lapse at renewal because policyholders forget the expiry date and find re-purchase friction high. Lapsed policies mean lost revenue and a gap in cover for the customer.';
+  document.getElementById('g-users').value='Motor-insurance policyholders within 30 days of expiry';
+  document.getElementById('g-goal').value='reduce avoidable policy lapse at renewal';
+  document.getElementById('g-scope').value='Notify the policyholder 30, 7 and 1 days before expiry\nLet them renew in two taps from the reminder\nShow the updated premium and what changed\nFall back to a human agent if the price needs review';
+  document.getElementById('g-metric').value='Renewal lapse rate';
+  document.getElementById('g-target').value='−15% within two quarters';
+  document.getElementById('g-risk').value='Reminder wording needs compliance sign-off; depends on the pricing service for live premiums';
+  doGenerate();
+}
+function docText(){
+  const doc=document.getElementById('doc'); if(!doc) return '';
+  let t=''; doc.querySelectorAll('h3,p,li,.title,.gwt').forEach(n=>{
+    const x=n.innerText.trim(); if(!x)return;
+    if(n.classList.contains('title'))t+='# '+x.replace('PRD','').trim()+'\n\n';
+    else if(n.tagName==='H3')t+='\n## '+x+'\n';
+    else if(n.tagName==='LI')t+='- '+x+'\n';
+    else t+=x+'\n';
+  }); return t;
+}
+function copyDoc(){navigator.clipboard.writeText(docText()).then(()=>flash('Copied'));}
+function downloadDoc(){
+  const blob=new Blob([docText()],{type:'text/markdown'});const u=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=u;a.download='PRD.md';a.click();URL.revokeObjectURL(u);
+}
+function flash(m){const n=document.createElement('div');n.textContent=m;n.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:9px;font-size:13px;z-index:99';document.body.appendChild(n);setTimeout(()=>n.remove(),1400);}
+
+/* ---------- REVIEW (deterministic rubric) ---------- */
+const WEASEL=["intuitive","user-friendly","seamless","robust","scalable","fast","easy","simple","flexible","powerful","efficient","optimize","optimise","improve","better","enhance","leverage","various","several","some","etc","as needed","as appropriate","if needed","tbd","to be decided","to be determined","probably","maybe","might","handle","support","nice to have","world-class","cutting-edge","state-of-the-art","best-in-class","engaging","delightful"];
+const SECTIONS=[
+  {key:'problem',label:'Problem is defined',weight:16,re:/problem|pain point|context|background|why now|motivation/i,fix:'State the problem, who feels it, and the evidence it exists.'},
+  {key:'users',label:'Target users named',weight:12,re:/target user|persona|audience|segment|who is this for|policyholder|customer/i,fix:'Name the specific user segment and their context.'},
+  {key:'goals',label:'Goals stated',weight:12,re:/\bgoal|objective|outcome we want/i,fix:'State the primary outcome the work should produce.'},
+  {key:'nongoals',label:'Non-goals / scope boundary',weight:12,re:/non-?goal|out of scope|out-of-scope|will not|won'?t|not building|not in scope/i,fix:'Add an explicit non-goals list to protect scope.'},
+  {key:'metrics',label:'Success metrics present',weight:14,re:/success metric|kpi|north star|success criteria|\bmetric|measure of success/i,fix:'Define at least one measurable success metric.'},
+  {key:'acceptance',label:'Acceptance criteria',weight:14,re:/acceptance criteria|given\b.*\bwhen\b.*\bthen|definition of done/is,fix:'Add Given / When / Then acceptance criteria per story.'},
+  {key:'stories',label:'User stories',weight:10,re:/as an? .{2,40}? i want|user stor/i,fix:'Express requirements as user stories: As a … I want … so that …'},
+  {key:'risks',label:'Dependencies / risks',weight:10,re:/dependenc|risk|assumption|constraint/i,fix:'List dependencies, assumptions and risks.'}
+];
+function reviewPRD(text){
+  const t=text||''; const low=t.toLowerCase();
+  const checks=SECTIONS.map(s=>{
+    const present=s.re.test(t);
+    let status=present?'pass':'fail',detail=present?'Found.':s.fix;
+    // measurability nuance for metrics
+    if(s.key==='metrics'&&present){
+      const seg=t.slice(Math.max(0,low.search(s.re)),low.search(s.re)+260);
+      if(!/\d|%|percent|x\b|×/.test(seg)){status='warn';detail='Mentioned, but not quantified — add a number, % or target.';}
+    }
+    if(s.key==='acceptance'&&present&&!/given\b.*\bwhen\b.*\bthen/is.test(t)){status='warn';detail='Mentioned, but no Given/When/Then structure detected.';}
+    return {label:s.label,status,detail,weight:s.weight};
+  });
+  // ambiguity scan
+  const found={};
+  WEASEL.forEach(w=>{const m=low.match(new RegExp('\\b'+w.replace(/[-/\\^$*+?.()|[\]{}]/g,'\\$&')+'\\b','g'));if(m)found[w]=m.length;});
+  const ambiguities=Object.entries(found).sort((a,b)=>b[1]-a[1]);
+  const totalWeasel=ambiguities.reduce((n,[,c])=>n+c,0);
+  // score
+  let base=checks.reduce((n,c)=>n+(c.status==='pass'?c.weight:c.status==='warn'?c.weight*0.5:0),0);
+  const words=Math.max(1,(t.match(/\w+/g)||[]).length);
+  const penalty=Math.min(18,Math.round(totalWeasel/words*1000)*2);
+  let score=Math.max(0,Math.min(100,Math.round(base-penalty)));
+  if(words<25)score=Math.min(score,12);
+  return {score,checks,ambiguities,totalWeasel,words};
+}
+function renderReview(r){
+  let rc=r.score>=75?'var(--good)':r.score>=45?'var(--warn)':'var(--bad)';
+  let verdict=r.score>=75?'Ship-ready, with polish':r.score>=45?'Needs work before build':'Not yet a usable spec';
+  let vsub=r.score>=75?'Strong structure. Tighten the flagged items.':r.score>=45?'Key sections are thin or vague — close the gaps below.':'Missing the requirements a team can build against.';
+  let h=`<div class="score-card">
+    <div class="ring" style="--p:${r.score};--rc:${rc}"><div class="inner"><div class="num" style="color:${rc}">${r.score}</div><div class="of">/ 100</div></div></div>
+    <div class="verdict">${verdict}<span>${vsub}</span></div></div>`;
+  h+=`<div style="margin-top:10px">`;
+  r.checks.forEach(c=>{
+    const sym=c.status==='pass'?'✓':c.status==='warn'?'!':'✕';
+    h+=`<div class="check"><div class="ic ${c.status}">${sym}</div><div><div class="ct">${c.label}</div><div class="cd">${c.detail}</div></div></div>`;
+  });
+  h+=`</div>`;
+  h+=`<h3 style="font-family:var(--display);font-weight:800;font-size:15px;margin:22px 0 4px;border-top:1px solid var(--line-2);padding-top:16px">Vague language (${r.totalWeasel})</h3>`;
+  if(r.ambiguities.length){
+    h+=`<p style="font-size:13px;color:var(--ink-2);margin:0 0 8px">These read as subjective. Replace each with something observable and testable.</p><div class="chips">`;
+    h+=r.ambiguities.map(([w,c])=>`<span class="wword">${esc(w)}${c>1?' ×'+c:''}</span>`).join('');
+    h+=`</div>`;
+  } else h+=`<p style="font-size:13.5px;color:var(--good)">None detected — the language is concrete.</p>`;
+  const fails=r.checks.filter(c=>c.status!=='pass');
+  if(fails.length){
+    h+=`<h3 style="font-family:var(--display);font-weight:800;font-size:15px;margin:22px 0 4px;border-top:1px solid var(--line-2);padding-top:16px">Top fixes</h3><ol class="fixlist">`;
+    h+=fails.slice(0,5).map(c=>`<li>${esc(c.detail)}</li>`).join('');
+    h+=`</ol>`;
+  }
+  return h;
+}
+function doReview(){
+  const t=val('r-input');
+  if(t.length<10){document.getElementById('r-out').innerHTML='<div class="empty"><div>Paste a PRD first — or load an example.</div></div>';return;}
+  document.getElementById('r-out').innerHTML=renderReview(reviewPRD(t));
+}
+const EXAMPLES={
+strong:`# Policy auto-renewal reminders — PRD
+
+## Problem & context
+~9% of motor-insurance policies lapse at renewal because policyholders miss the expiry date and re-purchase is high-friction. Each lapse is lost revenue and a coverage gap for the customer. Funnel data shows 60% of lapses had no renewal interaction at all.
+
+## Target users
+Motor-insurance policyholders within 30 days of policy expiry, on the mobile app.
+
+## Goals
+Reduce avoidable lapse at renewal and make renewing a two-tap action.
+
+## Non-goals
+We will not change pricing logic, and we will not build reminders for non-motor lines in this release.
+
+## User stories
+- As a policyholder near expiry, I want a clear reminder before my policy ends, so that I don't lose cover.
+- As a policyholder, I want to renew in two taps, so that I don't drop off.
+
+## Success metrics
+Renewal lapse rate: reduce from 9% to 7.6% (−15%) within two quarters. Reminder-to-renewal conversion: ≥ 25%.
+
+## Acceptance criteria
+- Given a policy 30 days from expiry, When the reminder job runs, Then the policyholder receives a push and email with the renewal CTA.
+- Given a tapped reminder, When the premium is unchanged, Then the user can confirm renewal in two taps and receives confirmation.
+
+## Dependencies & risks
+Depends on the pricing service for live premiums. Risk: reminder wording requires compliance sign-off before launch.`,
+weak:`We should make the renewal experience better and more user-friendly. The app should be fast, intuitive and scalable, and handle various edge cases as needed. We want to improve engagement and make customers happy. It should support reminders and probably some other nice-to-have features. Metrics: TBD. We'll figure out the details later — it just needs to be a seamless, world-class experience.`
+};
+function loadExample(which){document.getElementById('r-input').value=EXAMPLES[which];doReview();}
+
+/* ---------- optional LIVE AI (works inside Claude; falls back elsewhere) ---------- */
+async function callClaude(system,user){
+  const res=await fetch("https://api.anthropic.com/v1/messages",{
+    method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:1024,
+      messages:[{role:"user",content:system+"\n\n"+user}]})
+  });
+  if(!res.ok)throw new Error("unavailable");
+  const data=await res.json();
+  return data.content.map(b=>b.type==='text'?b.text:'').join('').trim();
+}
+function aiBanner(host){return `<div class="note" style="margin-top:0;margin-bottom:16px;border-left-color:var(--accent)">${host}</div>`;}
+function mdToHtml(s){return esc(s).replace(/^### (.*)$/gm,'<h3>$1</h3>').replace(/^## (.*)$/gm,'<h3>$1</h3>').replace(/^# (.*)$/gm,'<div class="title">$1</div>').replace(/^\- (.*)$/gm,'<li>$1</li>').replace(/(<li>.*<\/li>\n?)+/g,m=>'<ul>'+m+'</ul>').replace(/\*\*(.*?)\*\*/g,'<b>$1</b>').replace(/\n{2,}/g,'<br><br>');}
+
+async function doGenerateAI(){
+  const b=document.getElementById('g-ai');b.disabled=true;const old=b.textContent;b.textContent='Drafting…';
+  const d=gather();
+  try{
+    const out=await callClaude(
+      "You are a senior product manager. Write a crisp, well-structured PRD in markdown with sections: Overview, Problem & context, Goals & non-goals, Target users, User stories, Functional requirements, Success metrics (quantified), Acceptance criteria (Given/When/Then), Dependencies & risks, Open questions. Be concrete; avoid vague words.",
+      "Feature: "+(d.name||'(unnamed)')+"\nProblem: "+(d.problem||'?')+"\nUsers: "+(d.users||'?')+"\nGoal: "+(d.goal||'?')+"\nScope:\n"+(d.scope||'?')+"\nMetric: "+(d.metric||'?')+" Target: "+(d.target||'?')+"\nRisks: "+(d.risk||'?'));
+    document.getElementById('g-out').innerHTML=aiBanner('✦ <b>Drafted live by Claude.</b>')+'<div class="doc">'+mdToHtml(out)+'</div>';
+  }catch(e){
+    doGenerate();
+    document.getElementById('g-out').insertAdjacentHTML('afterbegin',aiBanner('Live AI is not available on this host — showing the built-in engine instead. (The AI path runs when this page is opened inside Claude.)'));
+  }finally{b.disabled=false;b.textContent=old;}
+}
+async function doReviewAI(){
+  const b=document.getElementById('r-ai');b.disabled=true;const old=b.textContent;b.textContent='Reviewing…';
+  const t=val('r-input');
+  if(t.length<10){document.getElementById('r-out').innerHTML='<div class="empty"><div>Paste a PRD first.</div></div>';b.disabled=false;b.textContent=old;return;}
+  try{
+    const out=await callClaude(
+      "You are a senior product manager reviewing a PRD. Give a short, direct critique: what's strong, the 3 biggest gaps, and concrete rewrites for any vague lines. Use markdown headings and bullets. Be specific.",
+      "PRD to review:\n\n"+t);
+    document.getElementById('r-out').innerHTML=aiBanner('✦ <b>Second opinion from Claude.</b>')+'<div class="doc">'+mdToHtml(out)+'</div>';
+  }catch(e){
+    doReview();
+    document.getElementById('r-out').insertAdjacentHTML('afterbegin',aiBanner('Live AI is not available on this host — showing the built-in rubric review instead. (The AI path runs when this page is opened inside Claude.)'));
+  }finally{b.disabled=false;b.textContent=old;}
+}
+</script>
+</body>
+</html>
