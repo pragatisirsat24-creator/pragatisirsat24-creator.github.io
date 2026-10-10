@@ -69,8 +69,6 @@
   .photo{aspect-ratio:1/1.05;background:
       radial-gradient(120% 90% at 30% 20%, #20243A 0%, #11131C 60%);
       display:grid;place-items:center;position:relative}
-  /* To use your own headshot: delete the .initials div below and drop
-     <img src="pragati.jpg" alt="Pragati Sirsat" style="width:100%;height:100%;object-fit:cover"> here. */
   .initials{font-family:var(--display);font-weight:800;font-size:62px;color:#fff;letter-spacing:-.02em}
   .photo::after{content:"";position:absolute;inset:0;box-shadow:inset 0 -60px 60px -40px rgba(0,0,0,.5)}
   .pmeta{padding:14px 16px;display:flex;justify-content:space-between;align-items:center;font-size:13px}
@@ -217,7 +215,7 @@
 
         <div class="portrait">
           <div class="photo">
-            <div class="initials">PS</div>
+            <img src="pragati.jpg" alt="Portrait of Pragati Sirsat" width="647" height="667" style="width:100%;height:100%;object-fit:cover;object-position:50% 20%">
           </div>
           <div class="pmeta">
             <span class="mono">Based in</span>
