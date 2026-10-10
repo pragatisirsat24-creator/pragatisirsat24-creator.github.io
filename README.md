@@ -6,7 +6,7 @@ A browser tool that turns a rough idea into a structured Product Requirements Do
 
 No backend, no API key, no cost — it runs entirely client-side and is free to host. An optional live-AI mode adds a qualitative pass from Claude when available.
 
-🔗 **Live demo:** _add your hosted URL here_ · 👤 **Built by** [Pragati Sirsat](https://www.linkedin.com/in/pragatisirsat/)
+🔗 **Live demo:** [pragatisirsat24-creator.github.io/prd.html](https://pragatisirsat24-creator.github.io/prd.html) · 👤 **Built by** [Pragati Sirsat](https://www.linkedin.com/in/pragatisirsat/)
 
 ---
 
